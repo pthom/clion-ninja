@@ -1,6 +1,6 @@
 # Ninja support for CLion IDE
 
-This script enables Ninja-powered builds in CLion IDE by wrapping around CMake, which it uses.
+This script enables Ninja-powered builds in CLion IDE by wrapping around CMake, which it uses. See my [blog post](http://nevkontakte.com/2015/rogue-ninja-support-in-clion.html) for details.
 
 ## Disclaimer
 
