@@ -5,6 +5,7 @@ import os
 import subprocess
 import shutil
 import re
+import select
 
 # ---------------------- Configuration section ------------------------------
 
@@ -32,13 +33,23 @@ def call_cmake(passing_args):
     passing_args = [REAL_CMAKE] + passing_args
     trace("Calling real cmake:", passing_args)
 
-    proc = subprocess.Popen(passing_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    proc = subprocess.Popen(passing_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     while True:
-        line = proc.stdout.readline()
-        if not line: break
-        sys.stdout.write(line)
-        trace(line)
-    return proc.wait()
+        reads = [proc.stdout.fileno(), proc.stderr.fileno()]
+        ret = select.select(reads, [], [])
+
+        for fd in ret[0]:
+            if fd == proc.stdout.fileno():
+                line = proc.stdout.readline()
+                sys.stdout.write(line)
+                trace(line)
+            if fd == proc.stderr.fileno():
+                line = proc.stderr.readline()
+                sys.stderr.write(line)
+                trace(line)
+
+        if proc.poll() != None:
+            return proc.poll()
 
 def is_real_project():
     """Detect if called inside clion private directory."""
@@ -104,11 +115,15 @@ if '-G' in sys.argv:
     # Generate Makefile artifacts required by CLion
     cache = CMakeCache('CMakeCache.txt')
     cache.makefy()
-    call_cmake(sys.argv[1:])
+    exit_code = call_cmake(sys.argv[1:])
+    if exit_code != 0:
+        sys.exit(exit_code)
 
     # Generate Ninja artifacts for actual build
     passing_args = ninjafy_argv(sys.argv[1:])
     cache.ninjafy()
-    call_cmake(passing_args)
+    sys.exit(call_cmake(passing_args))
 else:
-    call_cmake(sys.argv[1:])
+    sys.exit(call_cmake(sys.argv[1:]))
+
+
