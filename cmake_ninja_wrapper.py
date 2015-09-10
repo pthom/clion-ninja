@@ -33,7 +33,7 @@ def call_cmake(passing_args):
     passing_args = [REAL_CMAKE] + passing_args
     trace("Calling real cmake:", passing_args)
 
-    proc = subprocess.Popen(passing_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(passing_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=0)
     while True:
         reads = [proc.stdout.fileno(), proc.stderr.fileno()]
         ret = select.select(reads, [], [])
@@ -42,14 +42,26 @@ def call_cmake(passing_args):
             if fd == proc.stdout.fileno():
                 line = proc.stdout.readline()
                 sys.stdout.write(line)
+                sys.stdout.flush()
                 trace(line)
             if fd == proc.stderr.fileno():
                 line = proc.stderr.readline()
                 sys.stderr.write(line)
+                sys.stderr.flush()
                 trace(line)
 
         if proc.poll() != None:
-            return proc.poll()
+            break
+
+    for line in proc.stdout:
+        sys.stdout.write(line)
+        trace(line)
+
+    for line in proc.stderr:
+        sys.stderr.write(line)
+        trace(line)
+
+    return proc.poll()
 
 def is_real_project():
     """Detect if called inside clion private directory."""
@@ -125,5 +137,3 @@ if '-G' in sys.argv:
     sys.exit(call_cmake(passing_args))
 else:
     sys.exit(call_cmake(sys.argv[1:]))
-
-
