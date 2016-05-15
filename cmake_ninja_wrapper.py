@@ -18,7 +18,7 @@ else:
 
 if os.path.exists("/usr/local/bin/ninja"):
     NINJA_PATH = "/usr/local/bin/ninja"
-else
+else:
     NINJA_PATH = "/usr/bin/ninja"
 
 
