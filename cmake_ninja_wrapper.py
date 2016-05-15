@@ -6,11 +6,24 @@ import subprocess
 import shutil
 import re
 import select
+import os.path
 
 # ---------------------- Configuration section ------------------------------
 
-REAL_CMAKE = "/usr/local/bin/cmake"
+if os.path.exists("/usr/local/bin/cmake"):
+    REAL_CMAKE = "/usr/local/bin/cmake"
+else:
+    REAL_CMAKE = "/usr/bin/cmake"
+
+
+if os.path.exists("/usr/local/bin/ninja"):
+    NINJA_PATH = "/usr/local/bin/ninja"
+else
+    NINJA_PATH = "/usr/bin/ninja"
+
+
 TRACING = True
+
 
 # --------------------------- Code section ----------------------------------
 
@@ -97,7 +110,7 @@ class CMakeCache(object):
 
     def ninjafy(self):
         self.alter('CMAKE_GENERATOR:INTERNAL', 'Ninja')
-        self.alter('CMAKE_MAKE_PROGRAM:FILEPATH', '/usr/local/bin/ninja')
+        self.alter('CMAKE_MAKE_PROGRAM:FILEPATH', NINJA_PATH)
 
     def makefy(self):
         self.alter('CMAKE_GENERATOR:INTERNAL', 'Unix Makefiles')
