@@ -99,6 +99,7 @@ class CMakeCache(object):
             return
 
         with open(self.path, 'r') as cache_file:
+            cache_file_stat = os.stat(myfile)
             cache_data = cache_file.read()
 
         pattern = '%s=.*' % re.escape(variable)
@@ -107,6 +108,7 @@ class CMakeCache(object):
 
         with open(self.path, 'w') as cache_file:
             cache_file.write(cache_data)
+            os.utime(cache_file, (cache_file_stat.st_atime, cache_file_stat.st_mtime))
 
     def ninjafy(self):
         self.alter('CMAKE_GENERATOR:INTERNAL', 'Ninja')
