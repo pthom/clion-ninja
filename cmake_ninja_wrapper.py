@@ -6,24 +6,19 @@ import subprocess
 import shutil
 import re
 import select
-import os.path
-
 # ---------------------- Configuration section ------------------------------
 
-if os.path.exists("/usr/local/bin/cmake"):
-    REAL_CMAKE = "/usr/local/bin/cmake"
-else:
-    REAL_CMAKE = "/usr/bin/cmake"
-
-
-if os.path.exists("/usr/local/bin/ninja"):
-    NINJA_PATH = "/usr/local/bin/ninja"
-else:
-    NINJA_PATH = "/usr/bin/ninja"
-
-
 TRACING = True
-
+REAL_CMAKE = '/usr/local/bin/cmake'
+if not os.path.isfile(REAL_CMAKE):
+    REAL_CMAKE = '/usr/bin/cmake'
+if not os.path.isfile(REAL_CMAKE):
+    REAL_CMAKE = shutil.which('cmake')
+if not os.path.isfile(REAL_CMAKE):
+    sys.exit('Could not find cmake!')
+NINJA_PATH = shutil.which('ninja')
+if not os.path.isfile(NINJA_PATH):
+    sys.exit('Could not find ninja!')
 
 # --------------------------- Code section ----------------------------------
 
