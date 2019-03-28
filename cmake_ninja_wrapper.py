@@ -71,14 +71,6 @@ def call_cmake(passing_args):
 
     return proc.poll()
 
-def is_real_project():
-    """Detect if called inside clion private directory."""
-    cwd = os.getcwd()
-    result = "clion" in cwd and "cmake" in cwd.lower() and "generated" in cwd
-    trace("is_real_project cwd=" + cwd + " result=" + str(result))
-    return True
-    #return result
-
 class CMakeCache(object):
     """CMake cache management utility"""
     def __init__(self, path):
@@ -135,10 +127,6 @@ def ninjafy_argv(original):
 
 
 trace('Originally called:', sys.argv)
-
-# Enable wrapping logic only when called inside clion private directory.
-if not is_real_project():
-    sys.exit(call_cmake(sys.argv[1:]))
 
 # Check if generator argument was specified
 if '-G' in sys.argv:
