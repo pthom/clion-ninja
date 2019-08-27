@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
 import sys
 import os
@@ -8,15 +8,22 @@ import re
 import select
 # ---------------------- Configuration section ------------------------------
 
+def which(pgm):
+    path=os.getenv('PATH')
+    for p in path.split(os.path.pathsep):
+        p=os.path.join(p,pgm)
+        if os.path.exists(p) and os.access(p,os.X_OK):
+            return p
+
 TRACING = True
 REAL_CMAKE = '/usr/local/bin/cmake'
 if not os.path.isfile(REAL_CMAKE):
     REAL_CMAKE = '/usr/bin/cmake'
 if not os.path.isfile(REAL_CMAKE):
-    REAL_CMAKE = shutil.which('cmake')
+    REAL_CMAKE = which('cmake')
 if not os.path.isfile(REAL_CMAKE):
     sys.exit('Could not find cmake!')
-NINJA_PATH = shutil.which('ninja')
+NINJA_PATH = which('ninja')
 if not os.path.isfile(NINJA_PATH):
     sys.exit('Could not find ninja!')
 
@@ -86,7 +93,7 @@ class CMakeCache(object):
             return
 
         with open(self.path, 'r') as cache_file:
-            cache_file_stat = os.stat(myfile)
+            cache_file_stat = os.stat(self.path)
             cache_data = cache_file.read()
 
         pattern = '%s=.*' % re.escape(variable)
@@ -95,7 +102,7 @@ class CMakeCache(object):
 
         with open(self.path, 'w') as cache_file:
             cache_file.write(cache_data)
-            os.utime(cache_file, (cache_file_stat.st_atime, cache_file_stat.st_mtime))
+            os.utime(self.path, (cache_file_stat.st_atime, cache_file_stat.st_mtime))
 
     def ninjafy(self):
         self.alter('CMAKE_GENERATOR:INTERNAL', 'Ninja')
